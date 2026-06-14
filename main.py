@@ -44,18 +44,14 @@ logger = logging.getLogger(__name__)
 # ---------------------------------------------------------------------------
 
 PLANS = {
-    "10gb": {"name": "10 GB", "price": 110_000},
-    "20gb": {"name": "20 GB", "price": 220_000},
-    "30gb": {"name": "30 GB", "price": 300_000},
-    "50gb": {"name": "50 GB", "price": 499_000},
+    "10gb": {"name": "10 GB", "price": 110_000, "icon": "🔹", "desc": "مناسب برای استفاده روزمره و سبک"},
+    "20gb": {"name": "20 GB", "price": 220_000, "icon": "🔷", "desc": "پرفروش‌ترین پلن، مناسب اکثر کاربران"},
+    "30gb": {"name": "30 GB", "price": 300_000, "icon": "🔶", "desc": "مناسب کاربران پرمصرف"},
+    "50gb": {"name": "50 GB", "price": 499_000, "icon": "💎", "desc": "حجم بالا، بدون نگرانی برای اتمام حجم"},
 }
 
-# اطلاعات کارت‌ها برای پرداخت کارت‌به‌کارت
-# کارت دوم فعلاً مقدار نمونه دارد - در صورت نیاز آن را ویرایش کنید
-CARDS = [
-    {"number": "6063 7312 6171 9448", "holder": "محمد تمیمی خلف آبادی"},
-    {"number": "0000 0000 0000 0000", "holder": "نام دارنده کارت دوم را وارد کنید"},
-]
+# اطلاعات کارت برای پرداخت کارت‌به‌کارت
+CARD = {"number": "6063 7312 6171 9448", "holder": "محمد تمیمی خلف آبادی"}
 
 # ---------------------------------------------------------------------------
 # وضعیت‌های مکالمه (ConversationHandler states)
@@ -92,10 +88,25 @@ def main_menu_keyboard() -> InlineKeyboardMarkup:
 def plans_keyboard() -> InlineKeyboardMarkup:
     buttons = []
     for key, plan in PLANS.items():
-        label = f"🌐 {plan['name']} - {plan['price']:,} تومان"
+        label = f"{plan['icon']} {plan['name']}  |  {plan['price']:,} تومان"
         buttons.append([InlineKeyboardButton(label, callback_data=f"plan_{key}")])
     buttons.append([InlineKeyboardButton("🔙 بازگشت", callback_data="back_main")])
     return InlineKeyboardMarkup(buttons)
+
+
+def plans_intro_text() -> str:
+    lines = [
+        "🛍 *فروشگاه سرویس‌ها*",
+        "",
+        "✨ یکی از پلن‌های زیر را انتخاب کنید:",
+        "",
+    ]
+    for plan in PLANS.values():
+        lines.append(f"{plan['icon']} *{plan['name']}* — {plan['price']:,} تومان")
+        lines.append(f"   _{plan['desc']}_")
+        lines.append("")
+    lines.append("👇 برای خرید، روی پلن مورد نظر بزنید")
+    return "\n".join(lines)
 
 
 def back_keyboard(callback_data: str = "back_main") -> InlineKeyboardMarkup:
@@ -140,12 +151,11 @@ async def show_plans(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await query.answer()
     context.user_data.clear()
 
-    text = (
-        "🛍 لیست سرویس‌های موجود:\n\n"
-        "هر کدام از پلن‌های زیر مناسب نیاز شماست.\n"
-        "برای خرید، روی پلن مورد نظر کلیک کنید 👇"
+    await query.edit_message_text(
+        plans_intro_text(),
+        reply_markup=plans_keyboard(),
+        parse_mode=ParseMode.MARKDOWN,
     )
-    await query.edit_message_text(text, reply_markup=plans_keyboard())
     return SELECTING_PLAN
 
 
@@ -171,12 +181,11 @@ async def back_to_plans(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
 
-    text = (
-        "🛍 لیست سرویس‌های موجود:\n\n"
-        "هر کدام از پلن‌های زیر مناسب نیاز شماست.\n"
-        "برای خرید، روی پلن مورد نظر کلیک کنید 👇"
+    await query.edit_message_text(
+        plans_intro_text(),
+        reply_markup=plans_keyboard(),
+        parse_mode=ParseMode.MARKDOWN,
     )
-    await query.edit_message_text(text, reply_markup=plans_keyboard())
     return SELECTING_PLAN
 
 
@@ -209,8 +218,7 @@ async def receive_config_name(update: Update, context: ContextTypes.DEFAULT_TYPE
         "👇 روش پرداخت را انتخاب کنید:"
     )
     keyboard = InlineKeyboardMarkup([
-        [InlineKeyboardButton("💳 کارت به کارت (شماره ۱)", callback_data="pay_card1")],
-        [InlineKeyboardButton("💳 کارت به کارت (شماره ۲)", callback_data="pay_card2")],
+        [InlineKeyboardButton("💳 پرداخت کارت به کارت", callback_data="pay_card")],
         [InlineKeyboardButton("👛 پرداخت با کیف پول", callback_data="pay_wallet")],
         [InlineKeyboardButton("🔙 بازگشت", callback_data="back_plans")],
     ])
@@ -222,8 +230,6 @@ async def pay_card(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
 
-    card_index = 0 if query.data == "pay_card1" else 1
-    card = CARDS[card_index]
     plan = PLANS[context.user_data["plan_key"]]
 
     order_id = db.create_order(
@@ -241,8 +247,8 @@ async def pay_card(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "╚══════════════════════╝\n\n"
         f"💰 مبلغ: {plan['price']:,} تومان\n\n"
         "شماره کارت:\n"
-        f"{card['number']}\n"
-        f"👤 به نام: {card['holder']}\n\n"
+        f"{CARD['number']}\n"
+        f"👤 به نام: {CARD['holder']}\n\n"
         "━━━━━━━━━━━━━━━━━━━━━━\n"
         "📸 پس از واریز، عکس رسید را در همین چت ارسال کنید:"
     )
@@ -396,7 +402,6 @@ async def receive_topup_amount(update: Update, context: ContextTypes.DEFAULT_TYP
 
     amount = int(raw)
     context.user_data["topup_amount"] = amount
-    card = CARDS[0]
 
     text = (
         "╔══════════════════════╗\n"
@@ -404,8 +409,8 @@ async def receive_topup_amount(update: Update, context: ContextTypes.DEFAULT_TYP
         "╚══════════════════════╝\n\n"
         f"💰 مبلغ: {amount:,} تومان\n\n"
         "شماره کارت:\n"
-        f"{card['number']}\n"
-        f"👤 به نام: {card['holder']}\n\n"
+        f"{CARD['number']}\n"
+        f"👤 به نام: {CARD['holder']}\n\n"
         "━━━━━━━━━━━━━━━━━━━━━━\n"
         "📸 پس از واریز، عکس رسید را در همین چت ارسال کنید:"
     )
@@ -613,7 +618,7 @@ def main():
                 CallbackQueryHandler(back_to_plans, pattern="^back_plans$"),
             ],
             SELECTING_PAYMENT: [
-                CallbackQueryHandler(pay_card, pattern="^pay_card1$|^pay_card2$"),
+                CallbackQueryHandler(pay_card, pattern="^pay_card$"),
                 CallbackQueryHandler(pay_wallet, pattern="^pay_wallet$"),
                 CallbackQueryHandler(topup_start, pattern="^topup_start$"),
                 CallbackQueryHandler(back_to_plans, pattern="^back_plans$"),
