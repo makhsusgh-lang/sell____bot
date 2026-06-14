@@ -43,7 +43,11 @@ logger = logging.getLogger(__name__)
 # پلن‌ها و اطلاعات کارت‌ها
 # ---------------------------------------------------------------------------
 
-PLANS = {لطفاً سرویس مورد نظر را انتخاب کنید
+PLANS = {
+    "10gb": {"name": "10 GB", "price": 110_000, "icon": "🔹", "desc": "مناسب برای استفاده روزمره و سبک"},
+    "20gb": {"name": "20 GB", "price": 220_000, "icon": "🔷", "desc": "پرفروش‌ترین پلن، مناسب اکثر کاربران"},
+    "30gb": {"name": "30 GB", "price": 300_000, "icon": "🔶", "desc": "مناسب کاربران پرمصرف"},
+    "50gb": {"name": "50 GB", "price": 499_000, "icon": "💎", "desc": "حجم بالا، بدون نگرانی برای اتمام حجم"},
 }
 
 # اطلاعات کارت برای پرداخت کارت‌به‌کارت
@@ -91,18 +95,7 @@ def plans_keyboard() -> InlineKeyboardMarkup:
 
 
 def plans_intro_text() -> str:
-    lines = [
-        "🛍 *فروشگاه سرویس‌ها*",
-        "",
-        "✨ یکی از پلن‌های زیر را انتخاب کنید:",
-        "",
-    ]
-    for plan in PLANS.values():
-        lines.append(f"{plan['icon']} *{plan['name']}* — {plan['price']:,} تومان")
-        lines.append(f"   _{plan['desc']}_")
-        lines.append("")
-    lines.append("👇 برای خرید، روی پلن مورد نظر بزنید")
-    return "\n".join(lines)
+    return "⚡️ از سرویس‌های پرسرعت زیر یک مورد را انتخاب کنید 👇"
 
 
 def back_keyboard(callback_data: str = "back_main") -> InlineKeyboardMarkup:
