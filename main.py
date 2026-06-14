@@ -29,9 +29,9 @@ import database as db
 # ---------------------------------------------------------------------------
 
 BOT_TOKEN = os.environ.get("BOT_TOKEN", "8589038863:AAFBrmmLV5KOcO0Mw8PCGU0F8_KQv32GR_U")
-ADMIN_GROUP_ID = int(os.environ.get("ADMIN_GROUP_ID", "-1003966066313"))
-ADMIN_ID = int(os.environ.get("ADMIN_ID", "7374971382"))
-SUPPORT_USERNAME = os.environ.get("SUPPORT_USERNAME", "Aiireza_1383")
+ADMIN_GROUP_ID = int(os.environ.get("ADMIN_GROUP_ID", "-100396606631"))
+ADMIN_ID = int(os.environ.get("ADMIN_ID", "997824630"))
+SUPPORT_USERNAME = os.environ.get("SUPPORT_USERNAME", "TM7725")
 
 logging.basicConfig(
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
@@ -575,8 +575,16 @@ async def _handle_purchase_approval(message, context: ContextTypes.DEFAULT_TYPE,
         "از خرید شما متشکریم 🙏"
     )
 
+    delivery_keyboard = InlineKeyboardMarkup([
+        [InlineKeyboardButton("🛒 خرید سرویس جدید", callback_data="buy_service")]
+    ])
+
     try:
-        await context.bot.send_message(chat_id=order["user_id"], text=delivery_text)
+        await context.bot.send_message(
+            chat_id=order["user_id"],
+            text=delivery_text,
+            reply_markup=delivery_keyboard,
+        )
     except Exception:
         logger.exception("ارسال کانفیگ به کاربر %s ناموفق بود", order["user_id"])
 
