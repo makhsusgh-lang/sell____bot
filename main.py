@@ -29,9 +29,9 @@ import database as db
 # ---------------------------------------------------------------------------
 
 BOT_TOKEN = os.environ.get("BOT_TOKEN", "8589038863:AAFBrmmLV5KOcO0Mw8PCGU0F8_KQv32GR_U")
-ADMIN_GROUP_ID = int(os.environ.get("ADMIN_GROUP_ID", "-1003966066313"))
-ADMIN_ID = int(os.environ.get("ADMIN_ID", "7374971382"))
-SUPPORT_USERNAME = os.environ.get("SUPPORT_USERNAME", "Aiireza_1383")
+ADMIN_GROUP_ID = int(os.environ.get("ADMIN_GROUP_ID", "-1004484919863"))
+ADMIN_ID = int(os.environ.get("ADMIN_ID", "997824630"))
+SUPPORT_USERNAME = os.environ.get("SUPPORT_USERNAME", "TM7725")
 
 logging.basicConfig(
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
